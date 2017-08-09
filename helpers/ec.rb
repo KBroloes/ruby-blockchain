@@ -2,6 +2,8 @@ require 'openssl'
 
 class EllipticCurve
   UNCOMPRESSED = '04'
+  COMP_EVEN = '02'
+  COMP_ODD = '03'
 
   attr_reader :pkey, :pub
 
@@ -22,7 +24,7 @@ class EllipticCurve
     block_size = 32 * 2  # 32 bytes in hex
     type_size = 2        # 1 byte in hex
 
-    key = pub.split(//)
+    key = pub.split(//) # Convert to char array
 
     type = key.take(type_size).join
     x = key.drop(type_size).take(block_size).join
@@ -34,14 +36,16 @@ class EllipticCurve
   end
 
   def compressed(pub)
-    key = pub.split(//)
+    key = pub.split(//) # Convert to char array
     x = key.drop(2).take(64).join
-    is_odd?(key.drop(2 + 64)) ? prefix = '03' : prefix = '02'
 
-    prefix.concat x
+    # No reason to send the whole number for testing
+    y_ending = key.drop(2 + 64 + 63).join
+
+    get_prefix(y_ending).concat x
   end
-end
 
-def is_odd?(key)
-  (key.drop(63).join.hex() % 2) != 0
+  def get_prefix(key)
+    (key.hex() % 2) != 0 ? COMP_ODD : COMP_EVEN
+  end
 end
