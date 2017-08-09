@@ -20,7 +20,6 @@ def main
 
   components = ec.get_components(ec.get_compressed(pub))
   pretty_print components
-
 end
 
 def pretty_print (pub_components)
