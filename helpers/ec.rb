@@ -1,7 +1,6 @@
 require 'openssl'
 
 class EllipticCurve
-  COMPRESSED = '02'
   UNCOMPRESSED = '04'
 
   attr_reader :pkey, :pub
@@ -35,7 +34,14 @@ class EllipticCurve
   end
 
   def compressed(pub)
-    COMPRESSED.concat pub.split(//).drop(2).take(64).join
+    key = pub.split(//)
+    x = key.drop(2).take(64).join
+    is_odd?(key.drop(2 + 64)) ? prefix = '03' : prefix = '02'
+
+    prefix.concat x
   end
 end
 
+def is_odd?(key)
+  (key.drop(63).join.hex() % 2) != 0
+end
